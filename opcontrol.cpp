@@ -1,70 +1,84 @@
 #include "main.h"
 #include "variables.h"
-using namespace okapi;
-int FRONT_LEFT = 1;
-int FRONT_RIGHT = -2;
-int BACK_LEFT = -3;
-int BACK_RIGHT = 4;
-pros::Motor motor1 (1);
-pros::Motor motor2 (2);
-pros::Motor motor3 (3);
-pros::Motor motor4 (4);
-int ch1;
-int ch2;
-int ch3;
-int ch4;
-int thresh = 20;
+//using namespace okapi;
 
+int FRONT_LEFT = 4;
+int FRONT_RIGHT = 2;
+int BACK_LEFT = 1;
+int BACK_RIGHT = 3;
+int TWO_BAR = 5;
+int RIGHT_ROLLER = 6;
+int LEFT_ROLLER = 7;
+int PUSHER = 8;
+
+pros::Motor FrontRight (FRONT_RIGHT);
+pros::Motor FrontLeft (FRONT_LEFT);
+pros::Motor BackLeft (BACK_LEFT);
+pros::Motor BackRight (BACK_RIGHT);
+pros::Motor TwoBar (TWO_BAR);
+pros::Motor RightRoller (RIGHT_ROLLER);
+pros::Motor LeftRoller (LEFT_ROLLER);
+pros::Motor Pusher (PUSHER);
+
+int RightX;
+int RightY;
+int LeftY;
+int LeftX;
+bool liftUpButton;
+bool liftDownButton;
+bool pushForwardButton;
+bool pullBackwardsButton;
+int thresh = 20;
 
 void opcontrol() {
 
-	pros::Controller controller (pros::E_CONTROLLER_MASTER);
-	ControllerButton runAutoButton(ControllerDigital::X);
+	pros::Controller controller (CONTROLLER_MASTER);
 
 	while(true){
-		ch2 = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
-		ch1 = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
-		ch3 = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
-		ch4 = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X);
-		if((abs(ch1) > 0) || (abs(ch2) > 0) || (abs(ch3) > 0) || (abs(ch4) > 0)){
-			if(abs(ch1) < thresh) {
-				ch1 = 0;
+
+    RightX = controller.get_analog(ANALOG_RIGHT_X);
+		RightY = controller.get_analog(ANALOG_RIGHT_Y);
+		LeftY = controller.get_analog(ANALOG_LEFT_Y);
+		LeftX = controller.get_analog(ANALOG_LEFT_X);
+
+		bool rollUpButton = controller.get_digital(DIGITAL_R1);
+		bool rollDownButton = controller.get_digital(DIGITAL_R2);
+    bool liftUpButton = controller.get_digital(DIGITAL_L1);
+    bool liftDownButton = controller.get_digital(DIGITAL_L2);
+		bool pushForwardButton = controller.get_digital(DIGITAL_UP);
+		bool pullBackwardsButton = controller.get_digital(DIGITAL_DOWN);
+
+		if((abs(RightX) > 0) || (abs(RightY) > 0) || (abs(LeftY) > 0) || (abs(LeftX) > 0)){
+			if(abs(RightX) < thresh) {
+				RightX = 0;
 			}
-			if(abs(ch2) < thresh) {
-				ch2 = 0;
+			if(abs(RightY) < thresh) {
+				RightY = 0;
 			}
-			if(abs(ch3) < thresh) {
-				ch3 = 0;
+			if(abs(LeftY) < thresh) {
+				LeftY = 0;
 			}
-			if(abs(ch4) < thresh) {
-				ch4 = 0;
+			if(abs(LeftX) < thresh) {
+				LeftX = 0;
 			}
 
-			if(abs(ch3) > abs(ch2)) {
-				ch2 = 0;
+			if(abs(LeftY) > abs(RightY)) {
+				RightY = 0;
 			}
 			else {
-				ch3 = 0;
+				LeftY = 0;
 			}
 
-			if(abs(ch3) > 80){
-				ch1*=.707106781186548;
-			}
-		}
-			drive(ch1, ch2, ch3, ch4);
-		pros::Task::delay(10);
-
-	}
-}
-
-		if(runAutoButton.changedToPressed()){
-			for(int i = 0; i < 4; i++){
-				myChassis.moveDistance(12_in);
-				myChassis.turnAngle(90_deg);
+			if(abs(LeftY) > 80){
+				RightX *= .707106781186548;
 			}
 		}
 
+		drive(RightX, RightY, LeftY, LeftX);
+    		lift(liftUpButton, liftDownButton);
+		roll(rollUpButton, rollDownButton);
+		push(pushForwardButton, pullBackwardsButton);
+
 		pros::Task::delay(10);
 	}
-
 }
