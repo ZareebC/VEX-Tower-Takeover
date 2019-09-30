@@ -1,4 +1,5 @@
 #include "main.h"
+#include "variables.h"
 
 /**
  * Runs the user autonomous code. This function will be started in its own task
@@ -11,6 +12,14 @@
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
+
+ pros::Motor leftRoller1 (LEFT_ROLLER);
+ pros::Motor rightRoller1 (RIGHT_ROLLER);
+
+
 void autonomous() {
-  
+  leftRoller1.move_velocity(600);
+  rightRoller1.move_velocity(-600);
 }
+
+
