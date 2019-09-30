@@ -2,23 +2,23 @@
 #include "main.h"
 #include <math.h>
 
-pros::Motor move1 (4);
-pros::Motor move2 (2);
-pros::Motor move3 (1);
-pros::Motor move4 (-3);
+pros::Motor move1 (FRONT_LEFT);
+pros::Motor move2 (FRONT_RIGHT);
+pros::Motor move3 (BACK_LEFT);
+pros::Motor move4 (BACK_RIGHT);
 
-pros::Motor twoBar (5);
-pros::Motor leftRoller (6);
-pros::Motor rightRoller (7);
-pros::Motor pusher (8);
+pros::Motor twoBar (TWO_BAR);
+pros::Motor rightRoller (RIGHT_ROLLER);
+pros::Motor leftRoller (LEFT_ROLLER);
+pros::Motor pusher (PUSHER);
 
 
 void drive(int ch1, int ch2, int ch3, int ch4)
 {
-  move4.move(ch3  + ch4 + ch1);
+  move4.move(-ch3  + ch4 + ch1);
   move1.move(ch3 - ch4 + ch1);
-  move2.move(-(ch3 - ch4 - ch1));
-  move3.move(-(ch3 + ch4 - ch2));
+  move2.move(-(-ch3 - ch4 - ch1));
+  move3.move(-(ch3 + ch4 - ch1));
 }
 
 void lift(bool liftUpButton, bool liftDownButton)
@@ -36,35 +36,50 @@ void lift(bool liftUpButton, bool liftDownButton)
   }
 }
 
-void roll(bool rollUpButton, bool rollDownButton)
+void roll(bool rollUpButton, bool rollDownButton, bool slowRollUp, bool slowRollDown)
 {
   if(rollUpButton)
   {
-    leftRoller.move_velocity(100);
-    rightRoller.move_velocity(-100);
+    leftRoller.move_velocity(600);
+    rightRoller.move_velocity(-600);
   }
   else if(rollDownButton)
   {
-    leftRoller.move_velocity(-100);
-    rightRoller.move_velocity(100);
+    leftRoller.move_velocity(-600);
+    rightRoller.move_velocity(600);
   }
   else
   {
-    leftRoller.move_velocity(0);
-    rightRoller.move_velocity(0);
+    leftRoller.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+    rightRoller.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
   }
 }
-void push(bool pushForwardButton, bool pullBackwardsButton){
+
+void push(bool pushForwardButton, bool pullBackwardsButton)
+{
   if(pushForwardButton)
   {
-    pusher.move_velocity(20);
+      pusher.move_velocity(-50);
   }
   else if(pullBackwardsButton)
   {
-    pusher.move_velocity(-20);
+    if(pusher.get_position() == -520)
+    {
+       pusher.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+    }
+    else
+    {
+      pusher.move_velocity(50);
+    }
   }
   else
   {
     pusher.move_velocity(0);
+  }
+
+  if(pusher.get_position() <= -500)
+  {
+    leftRoller.move_velocity(30);
+    rightRoller.move_velocity(-30);
   }
 }
